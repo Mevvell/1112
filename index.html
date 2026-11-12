@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>My fav - 推し活ポータル ✨</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="pb-28 md:pb-14">
+
+  <!-- ふわふわ・きらきら背景エフェクト -->
+  <div class="sparkle-bg-container">
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+    <div id="sparkle-particles-container"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/75 backdrop-blur-md border-b border-pink-100/80 shadow-xs">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <!-- App Brand (きらきら・ふわふわロゴ) -->
+      <div class="flex items-center gap-2.5 flex-shrink-0 cursor-pointer group" onclick="App.updateActiveTab('home')">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md bg-gradient-to-tr from-pink-400 via-rose-400 to-amber-300 group-hover:scale-105 transition-transform">
+          <i data-lucide="sparkles" class="w-5 h-5 fill-current text-white drop-shadow"></i>
+        </div>
+        <div>
+          <h1 class="font-black text-xl tracking-tight bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 bg-clip-text text-transparent">
+            My fav
+          </h1>
+          <p class="text-[10px] text-pink-400 font-bold -mt-1 tracking-wider">推し活ポータル ✨</p>
+        </div>
+      </div>
+
+      <!-- Oshi Selector Pills (Horizontal Scroll) -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="oshi-pill-list">
+        <!-- JSで推し一覧を描画 -->
+      </div>
+
+      <!-- Add Oshi Button -->
+      <button
+        onclick="App.openOshiModal()"
+        class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black shadow-md hover:opacity-95 transition"
+        title="新しい推しを追加"
+      >
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">推しを追加</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 pt-6 space-y-6 relative z-10" id="main-content">
+    
+    <!-- Hero Profile Card (Dynamic Theme with Glow) -->
+    <div class="rounded-3xl p-6 sm:p-9 oshi-header-gradient text-white shadow-2xl relative overflow-hidden transition-all duration-500">
+      <div class="absolute -right-10 -bottom-10 w-60 h-60 rounded-full bg-white/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-10 -top-10 w-60 h-60 rounded-full bg-amber-200/20 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+        <!-- Avatar and Info -->
+        <div class="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          
+          <div class="relative flex-shrink-0">
+            <div id="header-oshi-avatar" class="relative overflow-hidden shadow-2xl transition-all duration-300 ring-4 ring-white/90 bg-white/30 avatar-size-medium avatar-shape-circle avatar-glow-ring">
+              <!-- Avatar JS -->
+            </div>
+            <button
+              onclick="App.openOshiModal(App.activeOshi)"
+              class="absolute -bottom-1 -right-1 p-2 bg-white text-pink-600 rounded-full shadow-lg hover:scale-110 transition border border-pink-100"
+              title="推しの写真・サイズ等を編集"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 fill-current"></i>
+            </button>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-center sm:justify-start gap-2 mb-1.5">
+              <span id="header-oshi-group" class="text-xs px-3 py-1 rounded-full bg-white/25 backdrop-blur-md font-bold tracking-wide"></span>
+              <span id="header-oshi-ruby" class="text-xs font-semibold opacity-90"></span>
+            </div>
+            <h2 id="header-oshi-name" class="text-3xl sm:text-4xl font-black tracking-tight text-sparkle"></h2>
+            
+            <div class="flex items-center justify-center sm:justify-start gap-2.5 mt-4">
+              <button
+                onclick="App.openOshiModal(App.activeOshi)"
+                class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/25 hover:bg-white/35 text-xs font-bold backdrop-blur-md transition shadow-xs"
+              >
+                <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                <span>写真・設定</span>
+              </button>
+              <button
+                onclick="App.openEditSnsModal()"
+                class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/25 hover:bg-white/35 text-xs font-bold backdrop-blur-md transition shadow-xs"
+              >
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <span>SNS・ch管理</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Days Badge Highlight -->
+        <div class="flex flex-col items-center sm:items-end justify-center bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/40 shadow-inner">
+          <div class="text-[11px] font-black uppercase tracking-wider opacity-90 flex items-center gap-1">
+            <i data-lucide="heart" class="w-3.5 h-3.5 fill-current"></i>
+            <span>推し始めてから</span>
+          </div>
+          <div class="flex items-baseline gap-1 my-1">
+            <span id="stat-days-since" class="text-4xl sm:text-5xl font-black tracking-tight drop-shadow">0</span>
+            <span class="text-base font-bold">日目</span>
+          </div>
+          <div id="stat-years-detail" class="text-xs font-bold opacity-90"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Tabs Navigation -->
+    <div class="hidden md:flex border-b border-pink-100 gap-1">
+      <button id="tab-btn-home" onclick="App.updateActiveTab('home')" class="px-6 py-3 font-bold text-sm transition flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <span>ホーム</span>
+      </button>
+      <button id="tab-btn-sns" onclick="App.updateActiveTab('sns')" class="px-6 py-3 font-bold text-sm transition flex items-center gap-2">
+        <i data-lucide="compass" class="w-4 h-4"></i>
+        <span>SNS・チャンネル</span>
+      </button>
+      <button id="tab-btn-gallery" onclick="App.updateActiveTab('gallery')" class="px-6 py-3 font-bold text-sm transition flex items-center gap-2">
+        <i data-lucide="image" class="w-4 h-4"></i>
+        <span>写真・画像</span>
+      </button>
+      <button id="tab-btn-notes" onclick="App.updateActiveTab('notes')" class="px-6 py-3 font-bold text-sm transition flex items-center gap-2">
+        <i data-lucide="book-heart" class="w-4 h-4"></i>
+        <span>活動メモ</span>
+      </button>
+      <button id="tab-btn-settings" onclick="App.updateActiveTab('settings')" class="px-6 py-3 font-bold text-sm transition flex items-center gap-2">
+        <i data-lucide="cloud" class="w-4 h-4"></i>
+        <span>クラウド同期・設定</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: HOME -->
+    <div id="tab-pane-home" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="glass-card rounded-3xl p-5 border border-pink-100/60 flex items-center gap-4">
+          <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-amber-200 to-yellow-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-xs p-3.5">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-400">次のキリ番記念日 ✨</div>
+            <div id="stat-milestone" class="text-lg font-black text-slate-800 mt-0.5">計算中...</div>
+            <div id="stat-milestone-sub" class="text-xs text-slate-500 font-medium mt-0.5"></div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-5 border border-pink-100/60 flex items-center gap-4">
+          <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-pink-200 to-rose-100 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-xs p-3.5">
+            <i data-lucide="cake" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-400">推しの誕生日 🎂</div>
+            <div id="stat-birthday" class="text-lg font-black text-slate-800 mt-0.5">計算中...</div>
+            <div id="stat-birthday-sub" class="text-xs text-slate-500 font-medium mt-0.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SNS Quick Jump Section (全チャンネル・アカウントが並ぶ) -->
+      <div>
+        <div class="flex items-center justify-between mb-3.5">
+          <h3 class="font-black text-slate-800 text-base flex items-center gap-2">
+            <i data-lucide="compass" class="w-5 h-5 text-oshi-primary"></i>
+            <span>SNS・チャンネル クイックアクセス</span>
+          </h3>
+          <button onclick="App.updateActiveTab('sns')" class="text-xs text-oshi-primary font-bold hover:underline">
+            すべて見る →
+          </button>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5" id="home-sns-quick">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+
+      <!-- Recent Photos Pick -->
+      <div>
+        <div class="flex items-center justify-between mb-3.5">
+          <h3 class="font-black text-slate-800 text-base flex items-center gap-2">
+            <i data-lucide="image" class="w-5 h-5 text-oshi-primary"></i>
+            <span>最新の写真</span>
+          </h3>
+          <button onclick="App.updateActiveTab('gallery')" class="text-xs text-oshi-primary font-bold hover:underline">
+            ギャラリーを開く →
+          </button>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5" id="home-recent-photos">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+
+      <!-- Recent Notes Pick -->
+      <div>
+        <div class="flex items-center justify-between mb-3.5">
+          <h3 class="font-black text-slate-800 text-base flex items-center gap-2">
+            <i data-lucide="book-heart" class="w-5 h-5 text-oshi-primary"></i>
+            <span>直近の推し活メモ</span>
+          </h3>
+          <button onclick="App.updateActiveTab('notes')" class="text-xs text-oshi-primary font-bold hover:underline">
+            メモ一覧 →
+          </button>
+        </div>
+        <div class="space-y-2.5" id="home-recent-notes">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SNS (複数チャンネル対応) -->
+    <div id="tab-pane-sns" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+            <span>公式SNS・チャンネルまとめ</span>
+            <span class="text-sm">🌸</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">複数のチャンネル（メイン・サブ・ゲーム配信等）もワンクリックで直接飛べます</p>
+        </div>
+        <button
+          onclick="App.openEditSnsModal()"
+          class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-pink-600 text-xs font-bold border border-pink-200 shadow-xs hover:bg-pink-50 transition"
+        >
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>チャンネル・SNSを追加</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="sns-cards-container">
+        <!-- JSで描画 -->
+      </div>
+    </div>
+
+    <!-- TAB 3: GALLERY -->
+    <div id="tab-pane-gallery" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+            <span>推し画像ギャラリー</span>
+            <span class="text-sm">✨</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">保存時に自動で軽量化（WebP圧縮）され、スマホの容量を圧迫しません</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="gallery-photo-count" class="text-xs font-bold text-pink-600 bg-pink-50 px-3 py-1.5 rounded-full border border-pink-100">0 枚</span>
+          <button
+            onclick="document.getElementById('photo-upload-input').click()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-oshi-primary text-white text-xs font-bold shadow-md hover:opacity-90 transition"
+          >
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>写真を追加</span>
+          </button>
+          <input type="file" id="photo-upload-input" multiple accept="image/*" class="hidden">
+        </div>
+      </div>
+
+      <div
+        id="photo-drop-zone"
+        onclick="document.getElementById('photo-upload-input').click()"
+        class="border-2 border-dashed border-pink-200 hover:border-oshi-primary rounded-3xl p-7 text-center cursor-pointer transition bg-white/60 hover:bg-pink-50/30"
+      >
+        <i data-lucide="image-plus" class="w-9 h-9 mx-auto text-pink-300 mb-2 animate-float"></i>
+        <p class="text-sm font-bold text-slate-700">クリックまたはドラッグ＆ドロップで写真を追加 💖</p>
+        <p class="text-xs text-slate-400 mt-1">スマホで撮った写真も自動で綺麗に軽量化されます（複数枚OK）</p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 sm:gap-4" id="gallery-container">
+        <!-- JSで描画 -->
+      </div>
+    </div>
+
+    <!-- TAB 4: NOTES -->
+    <div id="tab-pane-notes" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+            <span>推し活メモ・活動記録</span>
+            <span class="text-sm">📝</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">ライブ参戦、グッズ購入、発売日、日々の尊い瞬間を記録</p>
+        </div>
+        <button
+          onclick="App.openNoteModal()"
+          class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-oshi-primary text-white text-xs font-bold shadow-md hover:opacity-90 transition"
+        >
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>メモを書く</span>
+        </button>
+      </div>
+
+      <div class="space-y-3" id="notes-container">
+        <!-- JSで描画 -->
+      </div>
+    </div>
+
+    <!-- TAB 5: SETTINGS & CLOUD SYNC -->
+    <div id="tab-pane-settings" class="hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+          <span>クラウド同期 ＆ アプリ設定</span>
+          <span class="text-sm">☁️</span>
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">合言葉を使って、PCとスマホで同じデータを同期できます</p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-pink-100/60 shadow-sm space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <i data-lucide="key" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-black text-slate-800 text-base">合言葉（シークレットキー）同期</h3>
+              <p class="text-xs text-slate-500" id="sync-last-status">未同期（ローカル保存中）</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            あなたの合言葉（PIN / パスフレーズ）
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="setting-secret-key"
+              placeholder="例: my-secret-fav-2026"
+              class="flex-1 px-4 py-2.5 rounded-2xl border border-pink-200 text-sm focus:outline-none focus:ring-2 focus:ring-oshi-primary bg-white/90"
+            >
+            <button
+              onclick="App.saveSyncSettings()"
+              class="px-5 py-2.5 rounded-2xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
+            >
+              合言葉を保存
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1.5">
+            ※ PCとスマホで同じ合言葉を入力すると、両方の端末で同じデータが同期されます。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <button
+            onclick="App.uploadCloud()"
+            class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 text-white font-bold text-sm shadow-md hover:bg-indigo-700 transition"
+          >
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <span>クラウドに保存（送信）</span>
+          </button>
+
+          <button
+            onclick="App.downloadCloud()"
+            class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border border-indigo-200 text-indigo-700 font-bold text-sm hover:bg-indigo-50 transition"
+          >
+            <i data-lucide="cloud-download" class="w-4 h-4"></i>
+            <span>クラウドから取得（受信）</span>
+          </button>
+        </div>
+
+        <details class="text-xs border border-pink-100 rounded-2xl p-4 bg-white/60">
+          <summary class="font-bold text-slate-700 cursor-pointer flex items-center justify-between">
+            <span>⚙️ Supabase 接続情報の設定（アカウントをお持ちの方）</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+          </summary>
+          <div class="mt-4 space-y-3 pt-3 border-t border-slate-100">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Supabase Project URL</label>
+              <input
+                type="text"
+                id="setting-supabase-url"
+                placeholder="https://xyzcompany.supabase.co"
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none"
+              >
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Supabase Anon Key (公開キー)</label>
+              <input
+                type="password"
+                id="setting-supabase-anon"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none"
+              >
+            </div>
+            <div class="flex gap-2">
+              <button
+                onclick="App.testSupabase()"
+                class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 font-bold hover:bg-slate-200 transition"
+              >
+                接続テスト
+              </button>
+              <button
+                onclick="App.saveSyncSettings()"
+                class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
+              >
+                URLとキーを保存
+              </button>
+            </div>
+            <div class="mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="font-bold text-slate-700 mb-1">【Supabaseテーブル作成用SQL】</div>
+              <pre class="bg-slate-900 text-slate-100 p-2.5 rounded-lg text-[11px] overflow-x-auto select-all">CREATE TABLE IF NOT EXISTS my_fav_sync (
+  id TEXT PRIMARY KEY,
+  data JSONB NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+ALTER TABLE my_fav_sync ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public sync access" ON my_fav_sync FOR ALL USING (true) WITH CHECK (true);</pre>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="glass-card rounded-3xl p-6 border border-pink-100/60 shadow-sm space-y-4">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i data-lucide="hard-drive" class="w-4 h-4 text-slate-500"></i>
+          <span>ローカルバックアップ・復元（JSON）</span>
+        </h3>
+        <p class="text-xs text-slate-500">
+          クラウドを使わずにファイルとして推しデータや写真をPCに丸ごと保存・移行できます。
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <button
+            onclick="App.exportJson()"
+            class="px-4 py-2 rounded-full bg-white hover:bg-pink-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-pink-200 transition"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>バックアップを書き出す</span>
+          </button>
+          <label class="px-4 py-2 rounded-full bg-white hover:bg-pink-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer border border-pink-200 transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>バックアップから復元</span>
+            <input type="file" accept=".json" onchange="App.importJson(this.files[0]); this.value='';" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-6 border border-rose-200 bg-rose-50/40 shadow-sm space-y-3">
+        <h3 class="font-bold text-rose-800 text-sm flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
+          <span>危険な操作</span>
+        </h3>
+        <p class="text-xs text-rose-600">
+          現在選択中の推し（写真・メモを含む）を完全に削除します。
+        </p>
+        <button
+          onclick="App.deleteCurrentOshi()"
+          class="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition"
+        >
+          この推しを削除する
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t border-pink-100 flex justify-around py-2 px-2 shadow-lg">
+    <button id="mobile-tab-btn-home" onclick="App.updateActiveTab('home')" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-400">
+      <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <span>ホーム</span>
+    </button>
+    <button id="mobile-tab-btn-sns" onclick="App.updateActiveTab('sns')" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-400">
+      <i data-lucide="compass" class="w-5 h-5"></i>
+      <span>SNS</span>
+    </button>
+    <button id="mobile-tab-btn-gallery" onclick="App.updateActiveTab('gallery')" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-400">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span>写真</span>
+    </button>
+    <button id="mobile-tab-btn-notes" onclick="App.updateActiveTab('notes')" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-400">
+      <i data-lucide="book-heart" class="w-5 h-5"></i>
+      <span>メモ</span>
+    </button>
+    <button id="mobile-tab-btn-settings" onclick="App.updateActiveTab('settings')" class="flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-400">
+      <i data-lucide="cloud" class="w-5 h-5"></i>
+      <span>同期</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: Oshi Edit / Add -->
+  <div id="oshi-edit-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-pink-100">
+      <div class="flex items-center justify-between pb-3 border-b border-pink-100">
+        <h3 id="oshi-modal-title" class="font-black text-lg text-slate-800">推し情報の登録・編集 ✨</h3>
+        <button onclick="App.closeOshiModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="App.saveOshiForm(event)" class="space-y-4">
+        <input type="hidden" id="oshi-edit-id">
+
+        <div class="space-y-3 bg-pink-50/40 p-4 rounded-2xl border border-pink-100">
+          <div class="flex items-center gap-4">
+            <div class="relative w-20 h-20 rounded-full overflow-hidden bg-white border-2 border-pink-200 flex-shrink-0 shadow-sm">
+              <img id="oshi-avatar-preview" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-slate-700 mb-1">推しアイコン写真</label>
+              <input type="file" id="oshi-avatar-input" accept="image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pink-500 file:text-white hover:file:bg-pink-600">
+              <input type="hidden" id="oshi-avatar-hidden">
+            </div>
+          </div>
+
+          <div id="avatar-cropper-controls" class="hidden pt-2 space-y-2 border-t border-pink-200/60 text-xs">
+            <div class="flex items-center justify-between font-bold text-slate-600">
+              <span>🔍 ズーム（拡大・縮小）</span>
+            </div>
+            <input type="range" id="avatar-zoom-slider" min="100" max="250" value="100" class="w-full accent-pink-500">
+            <div class="flex items-center justify-between font-bold text-slate-600 pt-1">
+              <span>↕️ 上下位置の調整</span>
+            </div>
+            <input type="range" id="avatar-offset-y-slider" min="-100" max="100" value="0" class="w-full accent-pink-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">アイコンの表示サイズ</label>
+            <select id="oshi-avatar-size" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+              <option value="small">コンパクト (小)</option>
+              <option value="medium" selected>標準 (中)</option>
+              <option value="large">大きめ (大)</option>
+              <option value="xlarge">特大ビッグサイズ (特大)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">フレームの形状</label>
+            <select id="oshi-avatar-shape" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+              <option value="circle" selected>まん丸 (Circle)</option>
+              <option value="rounded">ふんわり角丸 (Rounded)</option>
+              <option value="flower">もこもこお花枠 (Flower)</option>
+              <option value="heart">きらきらハート枠 (Heart)</option>
+            </select>
+          </div>
+          <div class="col-span-full pt-1 flex items-center gap-2">
+            <input type="checkbox" id="oshi-avatar-glow" checked class="rounded text-pink-500 focus:ring-pink-400 accent-pink-500">
+            <label for="oshi-avatar-glow" class="font-bold text-slate-700 cursor-pointer">
+              ✨ きらきら光る発光リング（Glow）を付ける
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">推しの名前 <span class="text-rose-500">*</span></label>
+            <input type="text" id="oshi-edit-name" required placeholder="例: 星乃 るな" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ふりがな / ニックネーム</label>
+            <input type="text" id="oshi-edit-ruby" placeholder="例: るなぴ" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">グループ名 / 作品名など</label>
+          <input type="text" id="oshi-edit-group" placeholder="例: Starlight Project" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">推し始めた記念日 <span class="text-rose-500">*</span></label>
+            <input type="date" id="oshi-edit-start-date" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">誕生日</label>
+            <input type="date" id="oshi-edit-birthday" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-oshi-primary focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">イメージカラー（テーマカラー）</label>
+          <div class="flex items-center gap-3">
+            <input type="color" id="oshi-edit-color" value="#ec4899" class="w-10 h-10 rounded-2xl cursor-pointer border-0 p-0 shadow-xs">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#ec4899'" class="w-6 h-6 rounded-full bg-pink-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#3b82f6'" class="w-6 h-6 rounded-full bg-blue-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#8b5cf6'" class="w-6 h-6 rounded-full bg-purple-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#10b981'" class="w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#f59e0b'" class="w-6 h-6 rounded-full bg-amber-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#ef4444'" class="w-6 h-6 rounded-full bg-red-500 ring-2 ring-white shadow-xs"></button>
+              <button type="button" onclick="document.getElementById('oshi-edit-color').value='#06b6d4'" class="w-6 h-6 rounded-full bg-cyan-500 ring-2 ring-white shadow-xs"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-pink-100">
+          <button type="button" onclick="App.closeOshiModal()" class="px-4 py-2 rounded-full text-slate-500 font-bold text-xs hover:bg-slate-100 transition">
+            キャンセル
+          </button>
+          <button type="submit" class="px-6 py-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs shadow-md hover:opacity-90 transition">
+            保存する ✨
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SNS Edit (複数アカウント・チャンネル登録対応) -->
+  <div id="sns-edit-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-pink-100">
+      <div class="flex items-center justify-between pb-3 border-b border-pink-100">
+        <div>
+          <h3 class="font-black text-base text-slate-800">公式SNS・チャンネル管理 🌸</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">メインch、サブch、ゲーム配信、個人Xなど複数登録できます</p>
+        </div>
+        <button onclick="App.closeEditSnsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 現在登録中のチャンネル・アカウント一覧 -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-slate-700">登録済みリンク一覧</label>
+        <div id="sns-modal-accounts-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+
+      <!-- 新しいチャンネル・アカウントの追加フォーム -->
+      <form onsubmit="App.addNewSnsAccount(event)" class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 space-y-3">
+        <div class="text-xs font-bold text-pink-700 flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>新しいチャンネル / アカウントを追加</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">プラットフォーム</label>
+            <select id="new-sns-platform" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white font-medium focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+              <option value="youtube">YouTube</option>
+              <option value="twitter">X (旧Twitter)</option>
+              <option value="instagram">Instagram</option>
+              <option value="tiktok">TikTok</option>
+              <option value="other">その他 (Web/ブログ等)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">ボタンの表示名（ラベル）</label>
+            <input type="text" id="new-sns-title" placeholder="例: メインチャンネル, ゲーム配信ch" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">URL または アカウント名 <span class="text-rose-500">*</span></label>
+          <input type="text" id="new-sns-url" required placeholder="https://youtube.com/@channel や @username" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button type="submit" class="px-5 py-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>このリンクを追加 ✨</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="flex justify-end pt-2 border-t border-pink-100">
+        <button type="button" onclick="App.closeEditSnsModal()" class="px-5 py-2 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition">
+          完了
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Note Edit -->
+  <div id="note-edit-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border border-pink-100">
+      <div class="flex items-center justify-between pb-3 border-b border-pink-100">
+        <h3 class="font-black text-base text-slate-800">推し活メモの作成 💖</h3>
+        <button onclick="App.closeNoteModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="App.saveNoteForm(event)" class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">日付</label>
+            <input type="date" id="note-edit-date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">カテゴリ</label>
+            <select id="note-edit-category" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+              <option value="memory">✨ 思い出・感想</option>
+              <option value="live">🎤 ライブ・イベント</option>
+              <option value="goods">🛍️ グッズ</option>
+              <option value="release">💿 発売・配信</option>
+              <option value="other">📝 その他</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">タイトル <span class="text-rose-500">*</span></label>
+          <input type="text" id="note-edit-title" required placeholder="例: 全国ツアー初日参戦！" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">内容 <span class="text-rose-500">*</span></label>
+          <textarea id="note-edit-content" rows="4" required placeholder="感想やセットリスト、尊い思い出を自由に記録..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-oshi-primary focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-pink-100">
+          <button type="button" onclick="App.closeNoteModal()" class="px-4 py-2 rounded-full text-slate-500 font-bold text-xs hover:bg-slate-100">
+            キャンセル
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-full bg-oshi-primary text-white font-bold text-xs shadow hover:opacity-90">
+            保存する ✨
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Photo Detail -->
+  <div id="photo-detail-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-2xl w-full flex flex-col items-center max-h-[95vh]">
+      <div class="w-full flex justify-end pb-3">
+        <button onclick="App.closePhotoModal()" class="text-white/80 hover:text-white p-2 rounded-full bg-white/10 backdrop-blur-xs">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <div class="w-full flex-1 flex items-center justify-center overflow-hidden rounded-3xl bg-black/40">
+        <img id="photo-modal-img" class="max-w-full max-h-[65vh] object-contain rounded-2xl shadow-2xl">
+      </div>
+
+      <div class="w-full bg-white/15 backdrop-blur-md rounded-3xl p-4 mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-white border border-white/20">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button onclick="App.togglePhotoFavorite()" class="p-2 rounded-2xl bg-white/20 hover:bg-white/30 transition">
+            <i id="photo-modal-fav-icon" data-lucide="heart" class="w-5 h-5"></i>
+          </button>
+          <input
+            type="text"
+            id="photo-modal-caption"
+            placeholder="キャプションを入力..."
+            onchange="App.savePhotoCaption()"
+            class="bg-transparent border-b border-white/40 text-white placeholder-white/60 text-sm px-2 py-1 focus:outline-none focus:border-white flex-1"
+          >
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            onclick="App.downloadCurrentPhoto()"
+            class="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold flex items-center gap-1.5 transition"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>保存</span>
+          </button>
+          <button
+            onclick="App.deleteCurrentPhoto()"
+            class="px-3.5 py-1.5 rounded-full bg-rose-500/80 hover:bg-rose-600 text-xs font-bold flex items-center gap-1.5 transition"
+          >
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>削除</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App scripts -->
+  <script src="js/image-utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

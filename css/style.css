@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&family=Outfit:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
+
+:root {
+  --oshi-primary: #ec4899;
+  --oshi-primary-rgb: 236, 72, 153;
+  --oshi-primary-light: rgba(236, 72, 153, 0.08);
+  --oshi-primary-dark: #be185d;
+  --oshi-secondary: #f472b6;
+  --sparkle-glow: rgba(255, 255, 255, 0.8);
+}
+
+body {
+  font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Outfit', sans-serif;
+  background: radial-gradient(circle at 10% 20%, rgba(var(--oshi-primary-rgb), 0.05) 0%, #fafafa 40%, #fdf2f8 90%);
+  color: #334155;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.5s ease;
+}
+
+/* ふわふわ浮遊する背景の光のオーブ */
+.sparkle-bg-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.35;
+  animation: floatOrb 12s ease-in-out infinite alternate;
+}
+
+.orb-1 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, var(--oshi-primary) 0%, transparent 70%);
+  top: -50px;
+  right: -50px;
+  animation-duration: 14s;
+}
+
+.orb-2 {
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, #fbcfe8 0%, transparent 70%);
+  bottom: 10%;
+  left: -60px;
+  animation-duration: 18s;
+  animation-delay: -5s;
+}
+
+.orb-3 {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, #fef08a 0%, transparent 70%);
+  top: 40%;
+  right: 15%;
+  animation-duration: 16s;
+  animation-delay: -2s;
+  opacity: 0.25;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 40px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* きらきら星・ハートのアニメーション粒子 */
+.sparkle-item {
+  position: absolute;
+  pointer-events: none;
+  font-size: 14px;
+  animation: floatSparkle 6s ease-in-out infinite;
+  opacity: 0.6;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+}
+
+@keyframes floatSparkle {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0.3; }
+  50% { transform: translateY(-15px) rotate(15deg) scale(1.2); opacity: 0.85; }
+}
+
+/* ふわふわグラスモーフィズムカード */
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px -10px rgba(var(--oshi-primary-rgb), 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.02);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 35px -8px rgba(var(--oshi-primary-rgb), 0.22), 0 8px 16px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* ヘッダーのふわふわグラデーション */
+.oshi-header-gradient {
+  background: linear-gradient(135deg, var(--oshi-primary) 0%, var(--oshi-secondary) 60%, #fda4af 100%);
+  box-shadow: 0 16px 40px -10px rgba(var(--oshi-primary-rgb), 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* アイコン写真のフレーム形状 */
+.avatar-shape-circle {
+  border-radius: 9999px;
+}
+
+.avatar-shape-rounded {
+  border-radius: 28%;
+}
+
+.avatar-shape-flower {
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 8px var(--oshi-primary-light);
+  clip-path: polygon(
+    50% 0%, 65% 10%, 80% 5%, 88% 20%, 98% 28%, 95% 45%, 100% 60%, 90% 75%, 90% 90%, 75% 90%, 60% 100%, 45% 95%, 28% 98%, 20% 88%, 5% 80%, 10% 65%, 0% 50%, 10% 35%, 5% 20%, 20% 12%, 28% 2%, 45% 5%
+  );
+}
+
+.avatar-shape-heart {
+  border-radius: 20%;
+  position: relative;
+  clip-path: path('M 50,15 C 30,-5 0,10 0,40 C 0,70 45,95 50,100 C 55,95 100,70 100,40 C 100,10 70,-5 50,15 Z');
+  transform: scale(0.95);
+}
+
+/* アイコン写真のサイズバリエーション */
+.avatar-size-small {
+  width: 5rem !important;
+  height: 5rem !important;
+}
+
+.avatar-size-medium {
+  width: 7rem !important;
+  height: 7rem !important;
+}
+
+.avatar-size-large {
+  width: 9rem !important;
+  height: 9rem !important;
+}
+
+.avatar-size-xlarge {
+  width: 11.5rem !important;
+  height: 11.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .avatar-size-small {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+  .avatar-size-medium {
+    width: 8rem !important;
+    height: 8rem !important;
+  }
+  .avatar-size-large {
+    width: 10.5rem !important;
+    height: 10.5rem !important;
+  }
+  .avatar-size-xlarge {
+    width: 13.5rem !important;
+    height: 13.5rem !important;
+  }
+}
+
+/* きらきら光るアバターフレーム (Glow Ring) */
+.avatar-glow-ring {
+  position: relative;
+}
+
+.avatar-glow-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(var(--oshi-primary-rgb), 0.5), #fef08a);
+  z-index: -1;
+  animation: rotateGlow 8s linear infinite;
+  filter: blur(3px);
+}
+
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ふんわりパステルなSNSカード＆ボタンスタイル */
+.sns-card-soft {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 25px -8px rgba(var(--oshi-primary-rgb), 0.12);
+  border-radius: 1.75rem;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sns-card-soft:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 35px -8px rgba(var(--oshi-primary-rgb), 0.2);
+}
+
+/* ふんわりパステル調のSNSボタン */
+.btn-sns-twitter {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 6px 18px -4px rgba(30, 41, 59, 0.3);
+}
+.btn-sns-twitter-soft {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 14px -3px rgba(30, 41, 59, 0.1);
+}
+.btn-sns-twitter-soft:hover {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 20px -3px rgba(30, 41, 59, 0.25);
+}
+
+.btn-sns-instagram {
+  background: linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #8b5cf6 100%);
+  box-shadow: 0 8px 20px -4px rgba(236, 72, 153, 0.35);
+}
+.btn-sns-instagram-soft {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  color: #db2777;
+  border: 1px solid #fbcfe8;
+  box-shadow: 0 4px 14px -3px rgba(236, 72, 153, 0.15);
+}
+.btn-sns-instagram-soft:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #d946ef 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 22px -3px rgba(236, 72, 153, 0.35);
+}
+
+.btn-sns-youtube {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.3);
+}
+.btn-sns-youtube-soft {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  box-shadow: 0 4px 14px -3px rgba(239, 68, 68, 0.15);
+}
+.btn-sns-youtube-soft:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 22px -3px rgba(239, 68, 68, 0.35);
+}
+
+.btn-sns-tiktok {
+  background: linear-gradient(135deg, #06b6d4 0%, #0f172a 45%, #ec4899 100%);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.25);
+}
+.btn-sns-tiktok-soft {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.1);
+}
+.btn-sns-tiktok-soft:hover {
+  background: linear-gradient(135deg, #06b6d4 0%, #0f172a 50%, #ec4899 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 22px -3px rgba(15, 23, 42, 0.25);
+}
+
+/* ふわふわアニメーション */
+.animate-float-slow {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+/* きらきらテキストシャドウ */
+.text-sparkle {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 20px rgba(var(--oshi-primary-rgb), 0.3);
+}
+
+/* カスタムスクロールバー */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fdf2f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #f472b6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--oshi-primary);
+}
